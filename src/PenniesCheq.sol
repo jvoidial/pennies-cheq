@@ -13,7 +13,7 @@ interface IUniswapV2Router {
 
 contract PenniesCheq {
     string public constant name = "PENNIES CHEQ";
-    string public constant symbol = "2713";
+    string public constant symbol = "\u2713";   // ✓
     uint8 public constant decimals = 18;
     uint256 public totalSupply = 1_000_000_000_000_000 * 10**18;   // 1000 trillion
     uint256 public constant BURN_FEE = 100;                         // 1%
@@ -29,9 +29,10 @@ contract PenniesCheq {
 
     modifier onlyOwner() { require(msg.sender == owner); _; }
 
-    constructor(address _router) {
+    constructor() {
         owner = msg.sender;
-        router = IUniswapV2Router(_router);
+        // Base mainnet Uniswap V2 router
+        router = IUniswapV2Router(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24);
         balanceOf[msg.sender] = totalSupply;
         emit Transfer(address(0), msg.sender, totalSupply);
     }
