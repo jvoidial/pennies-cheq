@@ -73,7 +73,7 @@ contract PenniesCheq {
     }
 
     function addLiquidity(uint tokenAmount, uint ethAmount) external onlyOwner {
-        approve(address(router), tokenAmount);
+        this.approve(address(router), tokenAmount);
         router.addLiquidity{value: ethAmount}(
             address(this), router.WETH(),
             tokenAmount, ethAmount,
