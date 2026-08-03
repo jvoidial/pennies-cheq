@@ -13,7 +13,7 @@ interface IUniswapV2Router {
 
 contract PenniesCheq {
     string public constant name = "PENNIES CHEQ";
-    string public constant symbol = "✓";
+    string public constant symbol = "2713";
     uint8 public constant decimals = 18;
     uint256 public totalSupply = 1_000_000_000_000_000 * 10**18;   // 1000 trillion
     uint256 public constant BURN_FEE = 100;                         // 1%
