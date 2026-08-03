@@ -1,0 +1,25 @@
+name: Verify Contract on BaseScan
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify PENNIES CHEQ
+        env:
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+        run: |
+          forge verify-contract 0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7 \
+            src/PenniesCheq.sol:PenniesCheq \
+            --chain base \
+            --compiler-version 0.8.35 \
+            --optimizer-runs 200 \
+            --etherscan-api-key "$ETHERSCAN_API_KEY" \
+            --watch
