@@ -1,4 +1,4 @@
-name: Verify PENNIES CHEQ on BaseScan
+name: Verify PENNIES CHEQ via direct API
 
 on:
   push:
@@ -10,19 +10,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-      - name: Verify Contract (IR + correct BaseScan URL)
+      - name: Submit verification via curl
         env:
-          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+          API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
         run: |
-          forge verify-contract 0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7 \
-            src/PenniesCheq.sol:PenniesCheq \
-            --chain base \
-            --verifier-url https://api.basescan.org/api \
-            --verifier etherscan \
-            --compiler-version 0.8.35+commit.8a20c2bb \
-            --optimizer-runs 200 \
-            --via-ir \
-            --etherscan-api-key "$ETHERSCAN_API_KEY" \
-            --watch
+          # Read the source code from the repo
+          SOURCE=$(cat src/PenniesCheq.sol)
+
+          # Send verification request
+          RESPONSE=$(curl -s -X POST "https://api.basescan.org/v2/api" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "apikey=$API_KEY" \
+            --data-urlencode "module=contract" \
+            --data-urlencode "action=verifysourcecode" \
+            --data-urlencode "contractaddress=0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7" \
+            --data-urlencode "sourceCode=$SOURCE" \
+            --data-urlencode "codeformat=solidity-single-file" \
+            --data-urlencode "contractname=PenniesCheq" \
+            --data-urlencode "compilerversion=v0.8.35+commit.8a20c2bb" \
+            --data-urlencode "optimizationUsed=1" \
+            --data-urlencode "runs=200" \
+            --data-urlencode "licenseType=3" \
+            --data-urlencode "constructorArguements=")
+
+          echo "API response: $RESPONSE"
+          # Check if the submission was accepted
+          if echo "$RESPONSE" | jq -e '.status == "1" and .message == "OK"' > /dev/null; then
+            echo "✅ Verification submitted successfully!"
+          else
+            echo "❌ Verification failed: $RESPONSE"
+            exit 1
+          fi
