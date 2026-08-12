@@ -1,0 +1,23 @@
+name: Verify via Sourcify
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Submit to Sourcify
+        env:
+          PRIVATE_KEY: ${{ secrets.DEPLOYER_KEY }}
+        run: |
+          # Get the contract metadata from the deployed contract
+          forge verify-contract 0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7 \
+            src/PenniesCheq.sol:PenniesCheq \
+            --chain base \
+            --verifier sourcify \
+            --verifier-url https://sourcify.dev/server \
+            --watch
