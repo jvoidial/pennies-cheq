@@ -18,6 +18,7 @@ jobs:
           forge verify-contract 0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7 \
             src/PenniesCheq.sol:PenniesCheq \
             --chain base \
+            --compiler-version 0.8.35 \
             --verifier sourcify \
             --verifier-url https://sourcify.dev/server \
             --watch
