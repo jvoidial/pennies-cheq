@@ -1,0 +1,23 @@
+name: Verify New PENNIES CHEQ
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify new contract
+        env:
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+        run: |
+          forge verify-contract 0xca2537d9033Ff17958614c1E205DD0F136496992 \
+            src/PenniesCheq.sol:PenniesCheq \
+            --chain base \
+            --compiler-version 0.8.35+commit.47b9dedd \
+            --optimizer-runs 200 \
+            --etherscan-api-key "$ETHERSCAN_API_KEY" \
+            --watch
