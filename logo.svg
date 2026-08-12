@@ -1,4 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
-  <circle cx="100" cy="100" r="96" fill="#f59e0b" stroke="#fff" stroke-width="4"/>
-  <text x="100" y="115" text-anchor="middle" font-size="80" font-weight="bold" fill="#fff" font-family="sans-serif">✓</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#1a0030"/>
+    </radialGradient>
+    <linearGradient id="check" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <circle cx="200" cy="200" r="190" fill="url(#bg)" stroke="#fff" stroke-width="3"/>
+  <text x="200" y="190" text-anchor="middle" font-size="150" font-weight="bold" fill="url(#check)" font-family="sans-serif">✓</text>
+  <text x="200" y="270" text-anchor="middle" font-size="34" font-weight="bold" fill="#fbbf24" font-family="sans-serif" letter-spacing="4">PENNIES CHEQ</text>
+  <text x="200" y="340" text-anchor="middle" font-size="20" fill="#f59e0b" font-family="sans-serif" letter-spacing="2">GRAINGER'S NAME · IMMORTAL</text>
 </svg>
