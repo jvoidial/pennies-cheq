@@ -1,0 +1,25 @@
+name: Verify via Blockscout
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify on Blockscout
+        env:
+          DEPLOYER_KEY: ${{ secrets.DEPLOYER_KEY }}
+        run: |
+          # Blockscout uses Sourcify for verification
+          forge verify-contract 0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7 \
+            src/PenniesCheq.sol:PenniesCheq \
+            --chain base \
+            --verifier blockscout \
+            --verifier-url https://base.blockscout.com/api \
+            --compiler-version 0.8.35 \
+            --optimizer-runs 200 \
+            --watch
