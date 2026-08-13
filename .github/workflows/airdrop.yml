@@ -39,7 +39,7 @@ for recipient in recipients:
             '--rpc-url', 'https://mainnet.base.org',
             '--private-key', os.environ['PRIVATE_KEY'],
             '--legacy',
-            '--gas-price', '500000000'   # 0.5 gwei - higher to clear nonce
+            '--gas-price', '500000000'
         ], capture_output=True, text=True)
         if result.returncode == 0:
             print(f"  ✅ {name} sent")
