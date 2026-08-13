@@ -43,7 +43,7 @@ jobs:
           
           echo "Submitting to BaseScan..."
           
-          RESPONSE=$(curl -s -X POST "https://api.basescan.org/api" \
+          RESPONSE=$(curl -s -X POST "https://api.basescan.org/v2/api" \
             -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
             -H "Accept: application/json" \
             -H "Content-Type: application/x-www-form-urlencoded" \
