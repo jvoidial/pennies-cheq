@@ -14,28 +14,37 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.DEPLOYER_KEY }}
         run: |
-          RECIPIENTS=$(cat airdrop-addresses.json | jq -r '.recipients[]')
-          
-          for RECIPIENT in $RECIPIENTS; do
-            echo "🎁 Sending to $RECIPIENT..."
-            
-            # Send 100 SGUIDE (100 * 10^18)
-            cast send 0xb50DCEb0570557B9B7FE43D8cBDc9B3457D3dc5a \
-              "transfer(address,uint256)" $RECIPIENT 100000000000000000000 \
-              --rpc-url https://mainnet.base.org --private-key "$PRIVATE_KEY" --legacy
-            echo "  ✅ 100 SGUIDE sent"
-            
-            # Send 100 VDOO
-            cast send 0x38e4f08D08b4D772A7B75669C356b4749dd2d30b \
-              "transfer(address,uint256)" $RECIPIENT 100000000000000000000 \
-              --rpc-url https://mainnet.base.org --private-key "$PRIVATE_KEY" --legacy
-            echo "  ✅ 100 VDOO sent"
-            
-            # Send 100 PENNIES CHEQ
-            cast send 0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7 \
-              "transfer(address,uint256)" $RECIPIENT 100000000000000000000 \
-              --rpc-url https://mainnet.base.org --private-key "$PRIVATE_KEY" --legacy
-            echo "  ✅ 100 PENNIES CHEQ sent"
-          done
-          
-          echo "✅ Airdrop complete!"
+          python3 << 'PYEOF'
+import json, subprocess, os
+
+with open('airdrop-addresses.json', 'r') as f:
+    data = json.load(f)
+
+recipients = data.get('recipients', [])
+print(f"Found {len(recipients)} recipients")
+
+for recipient in recipients:
+    print(f"Sending to {recipient}...")
+    
+    tokens = [
+        ('SGUIDE', '0xb50DCEb0570557B9B7FE43D8cBDc9B3457D3dc5a', '100000000000000000000'),
+        ('VDOO', '0x38e4f08D08b4D772A7B75669C356b4749dd2d30b', '100000000000000000000'),
+        ('PENNIES CHEQ', '0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7', '100000000000000000000')
+    ]
+    
+    for name, token_addr, amount in tokens:
+        result = subprocess.run([
+            'cast', 'send', token_addr,
+            'transfer(address,uint256)', recipient, amount,
+            '--rpc-url', 'https://mainnet.base.org',
+            '--private-key', os.environ['PRIVATE_KEY'],
+            '--legacy',
+            '--gas-price', '500000000'   # 0.5 gwei - higher to clear nonce
+        ], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"  ✅ {name} sent")
+        else:
+            print(f"  ❌ {name}: {result.stderr[:100]}")
+
+print("✅ Airdrop complete!")
+PYEOF
