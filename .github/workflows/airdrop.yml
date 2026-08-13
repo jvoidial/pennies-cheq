@@ -10,31 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-      - name: Send Airdrops
+      - name: Run Airdrop
         env:
           PRIVATE_KEY: ${{ secrets.DEPLOYER_KEY }}
-        run: |
-          echo "Reading recipients..."
-          cat airdrop-addresses.json
-          echo ""
-          python3 -c "
-import json, subprocess, os
-with open('airdrop-addresses.json') as f:
-    data = json.load(f)
-recipients = data.get('recipients', [])
-print(f'Found {len(recipients)} recipients')
-tokens = [
-    ('0xb50DCEb0570557B9B7FE43D8cBDc9B3457D3dc5a', 'SGUIDE', '100000000000000000000'),
-    ('0x38e4f08D08b4D772A7B75669C356b4749dd2d30b', 'VDOO', '100000000000000000000'),
-    ('0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7', 'PENNIES CHEQ', '100000000000000000000')
-]
-for recipient in recipients:
-    print(f'Sending to {recipient}...')
-    for token_addr, name, amount in tokens:
-        result = subprocess.run(['cast','send',token_addr,'transfer(address,uint256)',recipient,amount,'--rpc-url','https://mainnet.base.org','--private-key',os.environ['PRIVATE_KEY'],'--legacy','--gas-price','500000000'], capture_output=True, text=True)
-        if result.returncode == 0:
-            print(f'  OK {name}')
-        else:
-            print(f'  FAIL {name}: {result.stderr[:80]}')
-print('Airdrop complete!')
-"
+        run: python3 airdrop_sender.py
