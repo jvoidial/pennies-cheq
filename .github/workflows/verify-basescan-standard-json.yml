@@ -1,0 +1,70 @@
+name: Verify PENNIES CHEQ via Standard JSON
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Submit Standard JSON Verification
+        env:
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+        run: |
+          # Build the standard JSON input
+          SOURCE=$(cat src/PenniesCheq.sol | jq -Rs .)
+          
+          STANDARD_JSON=$(jq -n \
+            --arg src "$SOURCE" \
+            '{
+              "language": "Solidity",
+              "sources": {
+                "PenniesCheq.sol": {
+                  "content": $src
+                }
+              },
+              "settings": {
+                "optimizer": {
+                  "enabled": true,
+                  "runs": 200
+                },
+                "viaIR": true,
+                "evmVersion": "paris",
+                "outputSelection": {
+                  "*": {
+                    "*": ["evm.bytecode", "evm.deployedBytecode", "abi"]
+                  }
+                }
+              }
+            }' | jq -c .)
+          
+          echo "Submitting to BaseScan..."
+          
+          RESPONSE=$(curl -s -X POST "https://api.basescan.org/api" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "apikey=$ETHERSCAN_API_KEY" \
+            --data-urlencode "module=contract" \
+            --data-urlencode "action=verifysourcecode" \
+            --data-urlencode "contractaddress=0x2a92CAA3b01E64634e2E95AA533a5570a76c19A7" \
+            --data-urlencode "sourceCode=$STANDARD_JSON" \
+            --data-urlencode "codeformat=solidity-standard-json-input" \
+            --data-urlencode "contractname=PenniesCheq" \
+            --data-urlencode "compilerversion=v0.8.35+commit.8a20c2bb" \
+            --data-urlencode "optimizationUsed=1" \
+            --data-urlencode "runs=200" \
+            --data-urlencode "licenseType=3" \
+            --data-urlencode "constructorArguements=")
+          
+          echo "Response: $RESPONSE"
+          
+          if echo "$RESPONSE" | jq -e '.status == "1" and .message == "OK"' > /dev/null; then
+            echo "✅ Verification submitted successfully!"
+          else
+            echo "❌ Verification failed: $RESPONSE"
+            exit 1
+          fi
